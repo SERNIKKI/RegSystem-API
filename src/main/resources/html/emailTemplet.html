@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"></meta>
+    <title>欢迎加入xx中心医院</title>
+    <style type="text/css">
+        body {
+            height: 100%;
+            width: 100%;
+            /*overflow-y: hidden;*/
+            overflow-x: hidden;
+            display: -webkit-box;
+            font-size: 16px;
+            line-height: 2;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            font-family: SourceHanSansSC, Chinese Quote, -apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif;
+        }
+        a {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            vertical-align: baseline;
+        }
+        ol, ul {
+            list-style: none;
+        }
+        .header {
+            display: flex;
+            justify-content: space-around;
+        }
+        .image {
+            width: 400px;
+            height: 200px;
+        }
+        .app {
+            width: 800px;
+            margin: 0 auto;
+        }
+        .content {
+            padding-top: 30px;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .link {
+            color: #66b1ff;
+        }
+        .link:hover {
+            color: #409eff;
+            text-decoration: underline;
+        }
+        .link:focus {
+            color: #409eff;
+            text-decoration: underline;
+        }
+        .email {
+            color: #409eff;
+        }
+        .around {
+            display: flex;
+            justify-content: space-around;
+        }
+        .footer {
+            text-align: center;
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 30px;
+        }
+        .end {
+            width: 100%;
+            background-color: #DCDFE6;
+            clear: both; /* 清除浮动元素格式 */
+            margin-top: -130px; /* Footer 高度的负值 */
+            height: 130px;
+            position:absolute;
+            top:100%;
+        }
+        .main {
+            width: 100%;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            /* text-align: center; */
+            justify-content: center;
+        }
+        .end-column-a {
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            display: flex;
+        }
+        .end-column-b {
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            display: flex;
+        }
+        li {
+            color: #999aaa;
+            margin: 0 4px;
+            font-size: 14px;
+            height: 16px;
+            line-height: 16px;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="app">
+            <div class="header">
+                <div class="image">
+                    <img width="400px" height="200px" src="http://reg-system-oss.oss-cn-beijing.aliyuncs.com/file/20220257372588722300/logo.jpg" alt="zhkulogo"></img>
+                </div>
+            </div>
+            <div class="content">
+                您好，<span id="name" class="bold"></span>医生:<br/>
+                <div class="text">
+                    <span>      恭喜您成为我院</span><span id="department"></span>所属<span id="secondDepartment"></span>的一员，请您在收到本邮件后，前往我院的<a href="http://localhost:8080/login" target="_blank" class="link">医疗健康云挂号系统</a>确认您的信息，如信息有误，请在系统内联系管理员解决。如果登录门户失败，请联系：<span class="email">badremilia@foxmail.com</span>告知我们您遇到的困难。您的初始账号信息如下，请勿将内容告知他人，以免信息泄露，给您带来不便。
+                    <br/>
+                    <div class="account">
+                        <div style="width: 100%" class="around bold">
+                            <div style="width: 400px">
+                                初始账号：<span id="userName" class="userName"></span><br/>
+                            </div>
+                        </div>
+                        <div style="width: 100%" class="around bold">
+                            <div style="width: 400px">
+                                初始密码：<span id="password" class="password"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <span>      我院的主旨是：</span><span class="center">诚心诚意为病人服务，一言一行树医院形象</span>，请您在恪守医生规范的同时，坚持初心，秉持着广博慈爱，追求卓越的品格
+                    耐心的为病人服务，做到厚德行医，医德共济。
+                </div>
+                <div class="footer">
+                    <div style="width: 210px">
+                        <div>xx市中心医院人事处</div>
+                        <div id="time"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="end">
+            <div class="logo">
+                <img width="50px" height="50px" src="http://reg-system-oss.oss-cn-beijing.aliyuncs.com/file/20220257372588722300/logo2.png" />
+                <span style="font-size: 18px;color: #999aaa;padding-left: 10px">医疗健康云团队版权所有</span>
+            </div>
+            <div>
+                <ul class="end-column-a">
+                    <li>
+                        <a href="">关于我们</a>
+                    </li>
+                    <li>
+                        <a href="">医院详情</a>
+                    </li>
+                    <li>
+                        <a href="">请求帮助</a>
+                    </li>
+                    <li>
+                        <img width="28px" height="28px" src="https://g.csdnimg.cn/common/csdn-footer/images/tel.png" />
+                        <span>100-100-1001</span>
+                    </li>
+                    <li>
+                        <img width="28px" height="28px" src="https://g.csdnimg.cn/common/csdn-footer/images/email.png" />
+                        <span>badremilia@foxmail.com</span>
+                    </li>
+                    <li>
+                        <img width="28px" height="28px" src="https://g.csdnimg.cn/common/csdn-footer/images/cs.png" />
+                        <span>在线客服</span>
+                    </li>
+                    <li>
+                        工作时间 8:30-22:00
+                    </li>
+                </ul>
+                <ul class="end-column-b">
+                    <li>
+                        <img width="28px" height="28px" src="https://g.csdnimg.cn/common/csdn-footer/images/badge.png" />
+                        <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010502030143" rel="noreferrer" target="_blank">公安备案号11010502030143</a>
+                    </li>
+                    <li><a href="http://beian.miit.gov.cn/publish/query/indexFirst.action" rel="noreferrer" target="_blank">京ICP备19004658号</a></li>
+                    <li><a href="http://www.cyberpolice.cn/" target="_blank">网络110报警服务</a></li>
+                    <li><a href="http://www.12377.cn/" target="_blank">中国互联网举报中心</a></li>
+                    <li>©1999-2022北京创新乐知网络技术有限公司</li>
+                    <li><a href="https://www.csdn.net/company/index.html#statement" target="_blank">版权与免责声明</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

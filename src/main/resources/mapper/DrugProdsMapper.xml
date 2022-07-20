@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.DrugProdDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.DrugProd">
+
+    </resultMap>
+    <resultMap id="prodMap" type="com.bs.regsystemapi.modal.vo.drug.DrugLabelInfo">
+        <result property="label" column="prod_name" />
+        <result property="value" column="prod_no" />
+    </resultMap>
+
+
+    <sql id="baseColumns">
+        id, prod_no, prod_name, prod_address, prod_zip, prod_fax, prod_hotline, prod_website,
+        prod_email, prod_tel, prod_province, create_name, create_time, update_name, update_time
+    </sql>
+    <select id="getDrugProdList" parameterType="com.bs.regsystemapi.modal.dto.drug.QueryDrugProdForm" resultType="com.bs.regsystemapi.entity.DrugProd">
+        select <include refid="baseColumns"></include>
+        from drug_prod
+        <where>
+            is_delete = '1'
+            <if test="prodName != null">
+                and prod_name like concat('%', #{prodName}, '%')
+            </if>
+            <if test="prodProvince != null">
+                and prod_province like concat('%', #{prodProvince}, '%')
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="getDrugProdInfo" resultType="com.bs.regsystemapi.entity.DrugProd" parameterType="java.lang.String">
+        select <include refid="baseColumns"></include>
+        from drug_prod
+        where prod_no = #{prodNo} and is_delete = '1'
+    </select>
+
+    <select id="getDrugProdLabel" resultMap="prodMap">
+        select prod_no, prod_name
+        from drug_prod
+        where is_delete = '1'
+    </select>
+
+    <update id="updateDrugProdInfo" parameterType="com.bs.regsystemapi.entity.DrugProd">
+        update drug_prod
+        <set>
+            <if test="prodName != null">
+                prod_name = #{prodName},
+            </if>
+            <if test="prodAddress">
+                prod_address = #{prodAddress},
+            </if>
+            <if test="prodZip != null">
+                prod_zip = #{prodZip},
+            </if>
+            <if test="prodFax != null">
+                prod_fax = #{prodFax},
+            </if>
+            <if test="prodHotline != null">
+                prod_hotline = #{prodHotline},
+            </if>
+            <if test="prodWebsite != null">
+                prod_website = #{prodWebsite},
+            </if>
+            <if test="prodEmail != null">
+                prod_email = #{prodEmail},
+            </if>
+            <if test="prodTel != null">
+                prod_tel = #{prodTel},
+            </if>
+            <if test="prodProvince != null">
+                prod_province = #{prodProvince},
+            </if>
+            <if test="updateName != null">
+                update_name = #{updateName},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="createName != null">
+                create_name = #{createName},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        where prod_no = #{prodNo}
+    </update>
+
+    <update id="deleteProd" parameterType="com.bs.regsystemapi.entity.DrugProd">
+        update drug_prod
+        set is_delete = '0', update_name = #{updateName}, update_time = #{updateTime}
+        where prod_no = #{prodNo}
+    </update>
+
+    <update id="recoverProd" parameterType="com.bs.regsystemapi.entity.DrugProd">
+        update drug_prod
+        set is_delete = '1', update_name = #{updateName}, update_time = #{updateTime}
+        where prod_no = #{prodNo}
+    </update>
+
+    <select id="getDeleteList" resultType="com.bs.regsystemapi.entity.DrugProd">
+        select <include refid="baseColumns"></include>
+        from drug_prod
+        where is_delete = '0'
+        order by update_time desc
+    </select>
+</mapper>

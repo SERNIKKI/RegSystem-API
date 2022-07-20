@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.ApprovalDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.Approval">
+
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, approval_no, approval_type, approval_title, approval_contact, approval_user, approval_time, approval_end_time,
+        approval_status, approval_name, is_delete, is_revoke, approval_remark, approval_reply
+    </sql>
+
+    <select id="getApprovalList" parameterType="com.bs.regsystemapi.modal.dto.approval.QueryApprovalForm" resultType="com.bs.regsystemapi.modal.vo.approval.ApprovalInfo">
+        select a.*, u.user_real_name
+        from approval a, `user` u
+        <where>
+            a.is_delete = '1' and a.approval_user = u.user_no
+            <if test="approvalType != null">
+                and a.approval_type = #{approvalType}
+            </if>
+            <if test="approvalTitle != null">
+                and a.approval_title like concat('%', #{approvalTitle}, '%')
+            </if>
+            <if test="approvalStatus != null">
+                and a.approval_status = #{approvalStatus}
+            </if>
+            <if test="isRevoke != null">
+                and a.is_revoke = #{isRevoke}
+            </if>
+            <if test="beginTime != null and endTime != null">
+                and (a.approval_time &gt;= beginTime and a.approval_time &lt;= endTime)
+            </if>
+        </where>
+        order by a.approval_time desc
+    </select>
+
+    <select id="getUserApprovalList" parameterType="com.bs.regsystemapi.modal.dto.approval.UserQueryApprovalForm" resultType="com.bs.regsystemapi.entity.Approval">
+        select <include refid="baseColumns"></include>
+        from approval
+        <where>
+            is_delete = '1' and approval_user = #{approvalUser}
+            <if test="approvalType != null">
+                and approval_type = #{approvalType}
+            </if>
+            <if test="approvalContact != null">
+                and approval_contact like concat('%', #{approvalContact}, '%')
+            </if>
+            <if test="approvalStatus != null">
+                and approval_status = #{approvalStatus}
+            </if>
+            <if test="isRevoke != null">
+                and is_revoke = #{isRevoke}
+            </if>
+        </where>
+        order by approval_time desc
+    </select>
+
+    <select id="getApprovalInfo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.approval.ApprovalInfo">
+        select a.*,u.user_real_name
+        from approval a, `user` u
+        where a.is_delete = '1' and a.approval_no = #{approvalNo} and a.approval_user = u.user_no
+    </select>
+
+    <update id="revokeApproval" parameterType="com.bs.regsystemapi.modal.dto.approval.ApprovalForm">
+        update approval
+        set is_revoke = '0', approval_end_time = #{approvalEndTime}, approval_name = #{approvalName}
+        where approval_no = #{approvalNo}
+    </update>
+
+    <update id="updateStatus" parameterType="com.bs.regsystemapi.modal.dto.approval.UpdateStatus">
+        update approval
+        <set>
+            <if test="approvalStatus != null">
+                approval_status = #{approvalStatus},
+            </if>
+            <if test="approvalEndTime != null">
+                approval_end_time = #{approvalEndTime},
+            </if>
+            <if test="approvalName != null">
+                approval_name = #{approvalName},
+            </if>
+            <if test="approvalRemark != null">
+                approval_remark = #{approvalRemark},
+            </if>
+            <if test="approvalReply != null">
+                approval_reply = #{approvalReply}
+            </if>
+        </set>
+        where approval_no = #{approvalNo}
+    </update>
+
+    <update id="deleteApproval" parameterType="com.bs.regsystemapi.modal.dto.approval.ApprovalForm">
+        update approval
+        set is_delete = '0', approval_end_time = #{approvalEndTime}, approval_name = #{approvalName}
+        where approval_no = #{approvalNo}
+    </update>
+
+    <update id="deleteUserApproval" parameterType="com.bs.regsystemapi.modal.dto.approval.UserApprovalForm">
+        update approval
+        set is_delete = '0'
+        where approval_no = #{approvalNo} and approval_user = #{approvalUser}
+    </update>
+
+    <update id="recoverApproval" parameterType="com.bs.regsystemapi.modal.dto.approval.ApprovalForm">
+        update approval
+        set is_delete = '1', approval_end_time = #{approvalEndTime}, approval_name = #{approvalName}
+        where approval_no = #{approvalNo}
+    </update>
+
+    <select id="getStatusList" resultType="com.bs.regsystemapi.modal.vo.approval.StatusInfo">
+        SELECT
+            count(*) as total ,
+            SUM(IF(is_revoke = '0', 1, 0)) AS `revoke`,
+            SUM(IF(approval_status = '0', 1, 0)) AS unprocessed,
+            SUM(IF(approval_status = '1', 1, 0)) AS processed,
+            SUM(IF(approval_status = '2', 1, 0)) AS reject
+        FROM
+            approval
+        WHERE
+            is_delete = '1'
+    </select>
+
+    <select id="getUserStatusList" resultType="com.bs.regsystemapi.modal.vo.approval.StatusInfo" parameterType="java.lang.String">
+        SELECT
+            count(*) as total ,
+            SUM(IF(is_revoke = '0', 1, 0)) AS `revoke`,
+            SUM(IF(approval_status = '0', 1, 0)) AS unprocessed,
+            SUM(IF(approval_status = '1', 1, 0)) AS processed,
+            SUM(IF(approval_status = '2', 1, 0)) AS reject
+        FROM
+            approval
+        WHERE
+            is_delete = '1' and approval_user = #{approvalUser}
+    </select>
+</mapper>

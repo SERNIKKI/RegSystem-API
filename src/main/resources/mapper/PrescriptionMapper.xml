@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.PrescriptionDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.Prescription">
+
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, prescription_no, doctor_no, person_no, pat_no, reg_no, person_height, person_weight, person_occupation,
+        person_marital_status, person_origin_addrress, person_work_address, person_allergic_history,
+        person_past_medical_history, person_remark, consultation_time, is_have_insurance, insurance_no, diagnosis,
+        drugs_no, total_price, order_no, creat_time, is_delete, prescription_status
+    </sql>
+
+    <select id="getPrescriptionList" parameterType="com.bs.regsystemapi.modal.dto.prescription.QueryPrescriptionForm" resultType="com.bs.regsystemapi.modal.vo.prescription.PrescriptionListInfo">
+        select p.*, u.user_real_name ,d.department ,d.second_department ,pp.person_name, pp.person_address ,pp.person_age,
+               pp.person_gender ,pp.identify_card ,pp.person_phone, pp2.user_cost as reserve_price
+        from prescription p ,`user` u ,pat_person pp ,department d, pat_payrecord pp2
+        <where>
+            p.doctor_no = u.user_no and u.user_department = d.second_id and p.person_no = pp.person_no and p.is_delete = '1' and pp2.reg_no = p.reg_no
+            <if test="personAddress != null">
+                and person_address like concat('%', #{personAddress}, '%')
+            </if>
+            <if test="diagnosis != null">
+                and diagnosis like concat('%', #{diagnosis}, '%')
+            </if>
+            <if test="personName != null">
+                and person_name like concat('%', #{personName}, '%')
+            </if>
+            <if test="userRealName != null">
+                and user_real_name like concat('%', #{userRealName}, '%')
+            </if>
+            <if test="secondDepartment != null">
+                and second_department like concat('%', #{secondDepartment}, '%')
+            </if>
+            <if test="beginTime != null and endTime == null">
+                and consultation_time &gt;= #{beginTime}
+            </if>
+            <if test="beginTime == null and endTime != null">
+                and consultation_time &lt;= #{endTime}
+            </if>
+            <if test="beginTime != null and endTime != null">
+                and consultation_time &lt;= #{endTime} and consultation_time &gt;= #{beginTime}
+            </if>
+            <if test="doctorNo != null">
+                and p.doctor_no = #{doctorNo}
+            </if>
+        </where>
+        order by p.creat_time desc
+    </select>
+
+    <select id="getHerbsList" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.prescription.prescriptionHerbsInfo">
+        select d.drug_general_name as drug_name ,dt.main_type as main_type,
+               dt.sub_type  as sub_type ,d.drug_indication as indication,ph.*,d.drug_genus as genus, d.drug_spec as spec ,d.drug_usage as `usage` ,d.drug_package as `drug_package` ,dp.drug_unit
+        from drug d ,prescription_herbs ph, drug_type dt,drug_price dp
+        where ph.drug_no = d.drug_no and ph.drug_type = '1' and dt.sub_id = d.drug_action and d.drug_no = dp.drug_no and ph.prescription_no = #{prescriptionNo}
+        union all
+        select dh.herb_name as drug_name ,dt2.main_type as main_type,
+               dt2.sub_type  as sub_type, dh.herb_efficacy as indication,ph2.*, '3' as genus, '' as spec, '' as `usage` ,'' as `drug_package` ,dp.drug_unit
+        from drug_herbs dh ,prescription_herbs ph2 ,drug_type dt2 ,drug_price dp
+        where dh.herb_no = ph2.drug_no and ph2.drug_type = '2' and dt2.sub_id = dh.herb_action and dh.herb_no = dp.drug_no and ph2.prescription_no = #{prescriptionNo}
+    </select>
+
+    <select id="getPrescriptionInfo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.prescription.PrescriptionListInfo">
+        select p.*, u.user_real_name ,d.department ,d.second_department ,pp.person_name, pp.person_address ,
+               pp.person_age, pp.person_gender ,pp.identify_card ,pp.person_phone, u.reserve_price, pp2.user_cost as reserve_price
+        from prescription p ,`user` u ,pat_person pp ,department d, pat_payrecord pp2
+        where p.doctor_no = u.user_no and u.user_department = d.second_id and p.person_no = pp.person_no and p.is_delete = '1'
+          and p.prescription_no = #{prescriptionNo} and pp2.reg_no = p.reg_no
+    </select>
+
+    <select id="getOrderInfo" parameterType="com.bs.regsystemapi.modal.dto.prescription.PrescriptionOrderForm" resultType="com.bs.regsystemapi.modal.vo.prescription.PrescriptionOrderInfo">
+        select po.*, pp.person_name ,p.total_price,u.user_real_name ,d.department ,d.second_department
+        from prescription_order po ,pat_person pp ,prescription p,`user` u ,department d
+        <where>
+            po.prescription_no = p.prescription_no and p.person_no = pp.person_no and u.user_no = p.doctor_no and d.second_id = u.user_department and po.is_delete = '1'
+            <if test="orderNo != null">
+                and order_no like concat('%', #{orderNo}, '%')
+            </if>
+            <if test="orderStatus != null">
+                and order_status = #{orderStatus}
+            </if>
+            <if test="payWay != null">
+                and pay_way = #{payWay}
+            </if>
+            <if test="personName != null">
+                and person_name like concat('%', #{personName}, '%')
+            </if>
+            <if test="userRealName != null">
+                and user_real_name like concat('%', #{userRealName}, '%')
+            </if>
+            <if test="secondDepartment != null">
+                and second_department like concat('%', #{secondDepartment}, '%')
+            </if>
+            <if test="beginTime != null and endTime == null">
+                and po.create_time &gt;= #{beginTime}
+            </if>
+            <if test="beginTime == null and endTime != null">
+                and po.create_time &lt;= #{endTime}
+            </if>
+            <if test="beginTime != null and endTime != null">
+                and po.create_time &lt;= #{endTime} and po.create_time &gt;= #{beginTime}
+            </if>
+        </where>
+        order by po.create_time desc
+    </select>
+</mapper>

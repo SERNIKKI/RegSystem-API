@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.DrugRecipeDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.DrugRecipe">
+
+    </resultMap>
+
+    <sql id="baseColumns">
+        d.id, d.recipe_no, d.recipe_name, d.recipe_pinyin, d.recipe_ingredient, d.recipe_action,
+        d.recipe_composed, d.recipe_apply, d.recipe_efficacy, d.recipe_indication, d.recipe_feature, d.recipe_ident, d.recipe_PA,
+        d.recipe_AOSC, d.recipe_MU, d.recipe_note, d.create_time, d.create_name, d.recipe_origin,
+        d.update_time, d.update_name, d.recipe_image
+    </sql>
+
+    <select id="getRecipeList" parameterType="com.bs.regsystemapi.modal.dto.drug.QueryRecipeForm" resultType="com.bs.regsystemapi.modal.vo.drug.RecipeInfo">
+        select <include refid="baseColumns"></include>, dt.main_type ,dt.sub_type
+        from drug_recipe d, drug_type dt
+        <where>
+            d.recipe_action = dt.sub_id and d.is_delete = '1'
+            <if test="recipeName != null">
+                and d.recipe_name like concat('%', #{recipeName}, '%')
+            </if>
+            <if test="recipePinyin != null">
+                and d.recipe_pinyin like concat('%', #{recipePinyin}, '%')
+            </if>
+            <if test="recipeAction != null">
+                and d.recipe_action = #{recipeAction}
+            </if>
+            <if test="recipeIndication != null">
+                and d.recipe_indication like concat('%', #{recipeIndication}, '%')
+            </if>
+            <if test="recipeOrigin != null">
+                and d.recipe_origin like concat('%', #{recipeOrigin}, '%')
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="getRecipeInfo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.drug.RecipeInfo">
+        select <include refid="baseColumns"></include>, dt.main_type ,dt.sub_type
+        from drug_recipe d, drug_type dt
+        where d.recipe_no = #{recipeNo} and d.recipe_action = dt.sub_id and d.is_delete = '1'
+    </select>
+
+    <update id="deleteRecipe" parameterType="com.bs.regsystemapi.entity.DrugRecipe">
+        update drug_recipe
+        set is_delete = '0', update_name = #{updateName}, update_time = #{updateTime}
+        where recipe_no = #{recipeNo}
+    </update>
+
+    <update id="recoverRecipe" parameterType="com.bs.regsystemapi.entity.DrugRecipe">
+        update drug_recipe
+        set is_delete = '1', update_name = #{updateName}, update_time = #{updateTime}
+        where recipe_no = #{recipeNo}
+    </update>
+
+    <select id="getDeleteList" resultType="com.bs.regsystemapi.modal.vo.drug.RecipeInfo">
+        select <include refid="baseColumns"></include>, dt.main_type ,dt.sub_type
+        from drug_recipe d, drug_type dt
+        where d.recipe_action = dt.sub_id and d.is_delete = '0'
+        order by update_time desc
+    </select>
+</mapper>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.DrugDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.Drug">
+
+    </resultMap>
+
+    <sql id="baseColumns">
+        d.id, d.drug_name, d.drug_general_name, d.drug_ingredient, d.drug_nature, d.drug_action,
+        d.drug_no, d.drug_indication, d.drug_spec, d.drug_usage, d.drug_adverse, d.drug_taboo, d.drug_cautions,
+        d.drug_interaction, d.drug_phar_effects, d.drug_storage, d.drug_package, d.drug_period_date,
+        d.drug_standards, d.drug_approval_num, d.drug_company, d.drug_price, d.update_name, d.create_time,
+        d.create_name, d.update_time, d.drug_genus, d.drug_image
+    </sql>
+
+    <select id="getDrugList" parameterType="com.bs.regsystemapi.modal.dto.drug.QueryDrugForm" resultType="com.bs.regsystemapi.modal.vo.drug.DrugInfo">
+        select <include refid="baseColumns"></include>,dt.main_type ,dt.sub_type, dp.prod_name
+        from drug d, drug_type dt, drug_prod dp
+        <where>
+            drug_action = dt.sub_id and drug_company = dp.prod_no and d.is_delete = '1'
+            <if test="drugName != null">
+                and drug_name like concat('%', #{drugName}, '%')
+            </if>
+            <if test="drugGeneralName != null">
+                and drug_general_name like concat('%', #{drugGeneralName}, '%')
+            </if>
+            <if test="drugIndication != null">
+                and drug_indication like concat('%', #{drugIndication}, '%')
+            </if>
+            <if test="drugCompany != null">
+                and drug_company = #{drugCompany}
+            </if>
+            <if test="createName != null">
+                and create_name like concat('%', #{createName}, '%')
+            </if>
+            <if test="drugAction != null">
+                and drug_action = #{drugAction}
+            </if>
+            <if test="drugGenus != null">
+                and drug_genus = #{drugGenus}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="getDrugInfo" resultType="com.bs.regsystemapi.modal.vo.drug.DrugInfo" parameterType="java.lang.String">
+        select <include refid="baseColumns"></include>,dt.main_type ,dt.sub_type, dp.prod_name
+        from drug d, drug_type dt, drug_prod dp
+        where drug_no = #{drugNo} and drug_action = dt.sub_id and drug_company = dp.prod_no and d.is_delete = '1'
+    </select>
+
+    <update id="updateDrugInfo" parameterType="com.bs.regsystemapi.entity.Drug">
+        update drug
+        <set>
+            <if test="drugName != null">
+                drug_name = #{drugName},
+            </if>
+            <if test="drugGeneralName != null">
+                drug_general_name = #{drugGeneralName},
+            </if>
+            <if test="drugIngredient != null">
+                drug_ingredient = #{drugIngredient},
+            </if>
+            <if test="drugNature != null">
+                drug_nature = #{drugNature},
+            </if>
+            <if test="drugAction != null">
+                drug_action = #{drugAction},
+            </if>
+            <if test="drugIndication != null">
+                drug_indication = #{drugIndication},
+            </if>
+            <if test="drugSpec != null">
+                drug_spec = #{drugSpec},
+            </if>
+            <if test="drugUsage != null">
+                drug_usage = #{drugUsage},
+            </if>
+            <if test="drugAdverse != null">
+                drug_adverse = #{drugAdverse},
+            </if>
+            <if test="drugTaboo != null">
+                drug_taboo = #{drugTaboo},
+            </if>
+            <if test="drugCautions != null">
+                drug_cautions = #{drugCautions},
+            </if>
+            <if test="drugInteraction != null">
+                drug_interaction = #{drugInteraction},
+            </if>
+            <if test="drugPharEffects != null">
+                drug_phar_effects = #{drugPharEffects},
+            </if>
+            <if test="drugStorage != null">
+                drug_storage = #{drugStorage},
+            </if>
+            <if test="drugPackage != null">
+                drug_package = #{drugPackage},
+            </if>
+            <if test="drugPeriodDate != null">
+                drug_period_date = #{drugPeriodDate},
+            </if>
+            <if test="drugStandards != null">
+                drug_standards = #{drugStandards},
+            </if>
+            <if test="drugApprovalNum != null">
+                drug_approval_num = #{drugApprovalNum},
+            </if>
+            <if test="drugCompany != null">
+                drug_company = #{drugCompany},
+            </if>
+            <if test="drugPrice != null">
+                drug_price = #{drugPrice},
+            </if>
+            <if test="updateName != null">
+                update_name = #{updateName},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="createName != null">
+                create_name = #{createName},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="drugGenus != null">
+                drug_genus = #{drugGenus},
+            </if>
+            <if test="drugImage != null">
+                drug_image = #{drugImage}
+            </if>
+        </set>
+        where drug_no = #{drugNo}
+    </update>
+
+    <update id="deleteDrug" parameterType="com.bs.regsystemapi.entity.Drug">
+        update drug
+        set is_delete = '0', update_name = #{updateName}, update_time = #{updateTime}
+        where drug_no = #{drugNo}
+    </update>
+
+    <update id="recoverDrug" parameterType="com.bs.regsystemapi.entity.Drug">
+        update drug
+        set is_delete = '1', update_name = #{updateName}, update_time = #{updateTime}
+        where drug_no = #{drugNo}
+    </update>
+
+    <select id="getDeleteList" resultType="com.bs.regsystemapi.modal.vo.drug.DrugInfo">
+        select <include refid="baseColumns"></include>,dt.main_type ,dt.sub_type, dp.prod_name
+        from drug d, drug_type dt, drug_prod dp
+        where drug_action = dt.sub_id and drug_company = dp.prod_no and d.is_delete = '0'
+        order by update_time desc
+    </select>
+
+    <select id="getDoctorDrugList" parameterType="com.bs.regsystemapi.modal.dto.drug.QueryDrugListForm" resultType="com.bs.regsystemapi.modal.vo.drug.DoctorDrugInfo">
+        select d.drug_no ,d.drug_general_name ,d.drug_nature ,d.drug_indication , d.drug_spec ,d.drug_usage ,d.drug_package ,dt.sub_type
+             ,dp.drug_price ,dp.drug_price_insurance ,dp.drug_unit,d.drug_genus, ds.count_total, dp.is_insurance
+        from drug d, drug_type dt ,drug_price dp, drug_stock ds
+        <where>
+            d.drug_no = dp.drug_no and d.drug_action = dt.sub_id and d.drug_no = ds.drug_no
+            <if test="drugGeneralName != null">
+                and d.drug_general_name like concat('%', #{drugGeneralName}, '%')
+            </if>
+            <if test="drugIndication != null">
+                and d.drug_indication like concat('%', #{drugIndication}, '%')
+            </if>
+            <if test="subType != null">
+                and dt.sub_type like concat('%', #{subType}, '%')
+            </if>
+            <if test="drugGenus != null">
+                and d.drug_genus = #{drugGenus}
+            </if>
+        </where>
+    </select>
+</mapper>

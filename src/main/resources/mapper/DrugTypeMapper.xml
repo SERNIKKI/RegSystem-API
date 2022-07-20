@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.DrugTypeDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.DrugType">
+
+    </resultMap>
+    <resultMap id="mainMap" type="com.bs.regsystemapi.modal.vo.drug.DrugLabelInfo">
+        <result property="label" column="main_type" />
+        <result property="value" column="value" />
+    </resultMap>
+    <resultMap id="subMap" type="com.bs.regsystemapi.modal.vo.drug.DrugLabelInfo">
+        <result property="label" column="sub_type" />
+        <result property="value" column="sub_id" />
+    </resultMap>
+    <sql id="baseColumns">
+        id, main_type, sub_type, sub_id, create_name, create_time,
+        update_name, update_time
+    </sql>
+
+    <select id="getMainTypeList" parameterType="java.lang.String" resultMap="mainMap">
+        select dt.main_type ,left(dt.sub_id,3) as value
+        from drug_type dt
+        where left(dt.sub_id,1) = #{type}
+        group by dt.main_type
+    </select>
+    
+    <select id="getSubTypeList" parameterType="java.lang.String" resultMap="subMap">
+        select dt.sub_type ,dt.sub_id
+        from drug_type dt
+        where left(dt.sub_id, 3) = #{mainId}
+    </select>
+</mapper>

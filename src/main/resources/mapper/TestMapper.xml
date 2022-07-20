@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.TestDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.TestEntity">
+
+    </resultMap>
+    
+    <sql id="baseColumns">
+        id, test_no, test_remark, create_name, create_id, create_time, update_name, update_id, update_time
+    </sql>
+    
+    <select id="selectTestList" resultType="com.bs.regsystemapi.entity.TestEntity">
+        select <include refid="baseColumns"></include>
+        from test
+        <where>
+            <if test="createName != null">
+                create_name like concat('%', #{createName}, '%')
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+    
+    <update id="updateTest" parameterType="com.bs.regsystemapi.modal.dto.UpdateTestForm">
+        update test
+        <set>
+            <if test="testRemark != null">
+                test_remark = #{testRemark},
+            </if>
+            <if test="updateName != null">
+                update_name = #{updateName},
+            </if>
+            <if test="updateId != null">
+                update_id = #{updateId},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        where test_no = #{testNo}
+    </update>
+
+    <delete id="deleteTest" parameterType="java.lang.String">
+        delete from test where test_no = #{testNo}
+    </delete>
+</mapper>

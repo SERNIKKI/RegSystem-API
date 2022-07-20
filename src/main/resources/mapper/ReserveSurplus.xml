@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.ReserveSurplusDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.ReserveSurplus">
+
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, surplus_no, doctor_no, sun_morning, sun_afternoon, sun_night, mon_morning, mon_afternoon,
+        mon_night, tue_morning, tue_afternoon, tue_night, wed_morning, wed_afternoon, wed_night,
+        thur_morning, thur_afternoon, thur_night, fri_morning, fir_afternoon, fir_night, sat_morning,
+        sat_afternoon, sat_night, update_name, update_time
+    </sql>
+
+    <select id="getSurplusList" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.surplus.SurplusInfo">
+        select r.*, u.user_real_name, d.second_department ,u.user_specialties
+        from reserve_surplus r ,`user` u, department d
+        where r.doctor_no = u.user_no and u.user_department = #{userDepartment} and u.is_delete = '1' and u.user_department = d.second_id
+    </select>
+
+    <select id="getSurplusByNo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.surplus.SurplusInfo">
+        select r.*, u.user_real_name, d.second_department ,u.user_specialties
+        from reserve_surplus r ,`user` u, department d
+        where r.doctor_no = u.user_no and d.doctor_no = #{doctorNo} and u.is_delete = '1' and u.user_department = d.second_id
+    </select>
+
+    <select id="getCount" statementType="STATEMENT" parameterType="com.bs.regsystemapi.modal.dto.surplus.AddSurplusDto" resultType="java.lang.Integer">
+        select ${colum}
+        from reserve_surplus
+        where doctor_no = ${doctorNo}
+    </select>
+
+    <select id="getTotal" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select total
+        from reserve_surplus
+        where doctor_no = ${doctorNo}
+    </select>
+
+    <select id="getTodayInfo" statementType="STATEMENT" parameterType="com.bs.regsystemapi.modal.dto.surplus.AddSurplusDto" resultType="com.bs.regsystemapi.modal.vo.surplus.TodayInfo">
+        select ${morning} as morning, ${afternoon} as afternoon, ${night} as night
+        from reserve_surplus
+        where doctor_no = ${doctorNo}
+    </select>
+</mapper>

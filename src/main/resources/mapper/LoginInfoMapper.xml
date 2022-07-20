@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.LoginInfoDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.LoginInfo">
+        <result property="id" column="id"/>
+        <result property="infoNo" column="info_no"/>
+        <result property="userNo" column="user_no"/>
+        <result property="loginIp" column="login_ip"/>
+        <result property="loginAddress" column="login_address"/>
+        <result property="loginTime" column="login_time"/>
+        <result property="loginState" column="login_state"/>
+        <result property="loginEqui" column="login_equi"/>
+        <result property="loginOnline" column="login_online"/>
+        <result property="loginInformation" column="login_information"/>
+        <result property="loginRemark" column="login_remark"/>
+        <result property="loginAccount" column="login_account"/>
+        <result property="logoutTime" column="logout_time"/>
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, info_no, user_no, login_ip, login_address, login_time, login_state, login_equi, login_online,
+        login_information, login_remark, login_account, logout_time
+    </sql>
+
+    <select id="getLoginInfoList" parameterType="java.lang.String" resultMap="testMap">
+        select <include refid="baseColumns"></include>
+        from `login_info`
+        where user_no = #{userNo}
+        order by login_time
+        desc limit 50
+    </select>
+
+    <select id="getLoginOnline" parameterType="java.lang.String" resultMap="testMap">
+        select <include refid="baseColumns"></include>
+        from  `login_info`
+        where user_no = #{userNo} and login_online = 1
+    </select>
+
+    <update id="logoutInfo" parameterType="com.bs.regsystemapi.modal.dto.user.LogoutForm">
+        update `login_info`
+        <set>
+            <if test="logoutTime != null">
+                logout_time = #{logoutTime},
+            </if>
+            <if test="loginOnline != null">
+                login_online = #{loginOnline}
+            </if>
+        </set>
+        where info_no = #{infoNo}
+    </update>
+
+</mapper>

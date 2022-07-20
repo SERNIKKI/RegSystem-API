@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.MessageDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.Messages">
+        <result property="id" column="id"/>
+        <result property="messageNo" column="message_no"/>
+        <result property="actorNo" column="actor_no"/>
+        <result property="receiverNo" column="receiver_no"/>
+        <result property="type" column="type"/>
+        <result property="content" column="content"/>
+        <result property="sendTime" column="send_time"/>
+        <result property="sendStatus" column="send_status"/>
+        <result property="isRead" column="is_read"/>
+        <result property="fileUrl" column="file_url"/>
+        <result property="duration" column="duration"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="fileExt" column="file_ext"/>
+        <result property="isBack" column="is_back"/>
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, actor_no, receiver_no, type, content, send_time, send_status, is_read,
+        file_url, duration, file_name, file_size, file_ext, is_back, message_no, width, height, file_status
+    </sql>
+
+    <select id="getMessage" parameterType="com.bs.regsystemapi.modal.dto.message.MessageFrom" resultType="com.bs.regsystemapi.modal.vo.MessageInfo">
+        select <include refid="baseColumns"></include>
+        from messages m
+        <where>
+            1 = 1
+            <if test="fromNo != null and toNo != null">
+                and ((m.actor_no = #{fromNo} and m.receiver_no = #{toNo}) or (m.actor_no = #{toNo} and m.receiver_no = #{fromNo}))
+            </if>
+            <if test="sendStatus != null">
+                and m.send_status = #{sendStatus}
+            </if>
+            <if test="afterTime != null">
+                and m.send_time &gt; #{afterTime}
+            </if>
+            <if test="beforeTime != null">
+                and m.send_time &lt; #{beforeTime}
+            </if>
+        </where>
+        order by m.send_time desc
+        <if test="limit > 0">
+            limit #{limit}
+        </if>
+    </select>
+
+    <select id="getMessagePatientToDoctor" parameterType="com.bs.regsystemapi.modal.dto.message.MessageFrom" resultType="com.bs.regsystemapi.modal.vo.MessageInfo">
+        select <include refid="baseColumns"></include>
+        from messages m
+        <where>
+            1 = 1
+            <if test="fromNo != null and toNo != null">
+                and ((m.actor_no = #{fromNo} and m.receiver_no = #{toNo}) or (m.actor_no = #{toNo} and m.receiver_no = #{fromNo}))
+            </if>
+            <if test="sendStatus != null">
+                and m.send_status = #{sendStatus}
+            </if>
+            <if test="afterTime != null">
+                and m.send_time &gt; #{afterTime}
+            </if>
+            <if test="beforeTime != null">
+                and m.send_time &lt; #{beforeTime}
+            </if>
+        </where>
+        order by m.send_time desc
+        <if test="limit > 0">
+            limit #{limit}
+        </if>
+    </select>
+    <select id="getMessageDoctorToPatient" parameterType="com.bs.regsystemapi.modal.dto.message.MessageFrom" resultType="com.bs.regsystemapi.modal.vo.MessageInfo">
+        select <include refid="baseColumns"></include>
+        from messages m
+        <where>
+            1 = 1
+            <if test="fromNo != null and toNo != null">
+                and ((m.actor_no = #{fromNo} and m.receiver_no = #{toNo}) or (m.actor_no = #{toNo} and m.receiver_no = #{fromNo}))
+            </if>
+            <if test="sendStatus != null">
+                and m.send_status = #{sendStatus}
+            </if>
+            <if test="afterTime != null">
+                and m.send_time &gt; #{afterTime}
+            </if>
+            <if test="beforeTime != null">
+                and m.send_time &lt; #{beforeTime}
+            </if>
+        </where>
+        order by m.send_time desc
+        <if test="limit > 0">
+            limit #{limit}
+        </if>
+    </select>
+
+
+    <select id="getMessageByNo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.MessageInfo">
+        select  *
+        from
+        (
+        select *,
+        (select count(*)
+        from messages m1
+        where (m2.receiver_no  = m1.receiver_no and m2.actor_no  = m1.actor_no)
+        or (m2.receiver_no = m1.actor_no and m2.actor_no = m1.receiver_no)
+        ) as nums
+        from messages m2
+        where receiver_no = #{receiverNo} or actor_no = #{receiverNo}
+        order by send_time desc
+        ) tmp
+        group by nums
+<!--        select <include refid="baseColumns"></include> from (-->
+<!--            select ROW_NUMBER() over(partition by tt.num order by send_time desc) RowNum,tt.*-->
+<!--            from(-->
+<!--            select m.id, m.actor_no,m.receiver_no, m.`type`, m.content, m.send_status, m.is_read,-->
+<!--            m.file_url, m.duration, m.file_name, m.file_size,m.send_time, m.file_ext, m.is_back, m.width, m.height, m.file_status,-->
+<!--            m.message_no, ifnull(cast(actor_no as UNSIGNED),0) + ifnull(cast(receiver_no as UNSIGNED),0) as num-->
+<!--            from messages m where receiver_no = #{receiverNo} or actor_no = #{receiverNo} ) tt-->
+<!--            ) as t1 where RowNum = 1-->
+<!--        order by send_time desc-->
+    </select>
+
+    <select id="getNewsCount" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(1) as isNews from messages
+        where receiver_no = #{receiverNo} and is_read = 0
+    </select>
+
+    <select id="getMessageByActorNo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.MessageInfo">
+        select *
+        from (
+            select *
+            from messages
+                where actor_no = #{actorNo}
+                ORDER BY send_time desc limit 1000
+            ) a
+        GROUP BY receiver_no;
+    </select>
+    <select id="getMessageByReceiverNo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.MessageInfo">
+        select *
+        from (
+                 select *
+                 from messages
+                 where receiver_no = #{receiverNo}
+                 ORDER BY send_time desc limit 1000
+             ) a
+        GROUP BY actor_no;
+    </select>
+
+    <update id="updateReadStatus" parameterType="com.bs.regsystemapi.modal.dto.message.UpdateReadStatusForm">
+        update messages m
+        set m.is_read = 1
+        where m.actor_no = #{actorNo} and m.receiver_no = #{receiverNo} and m.is_read = 0
+    </update>
+
+    <update id="updateFilePathForm" parameterType="com.bs.regsystemapi.modal.dto.file.UpdateFilePathForm">
+        update messages m
+        <set>
+            <if test="fileUrl != null">
+                m.file_url = #{fileUrl},
+            </if>
+            <if test="fileStatus != null">
+                m.file_status = #{fileStatus}
+            </if>
+        </set>
+        where m.message_no = #{messageNo}
+    </update>
+
+    <update id="updateFileUploadTime" parameterType="com.bs.regsystemapi.modal.dto.message.UpdateFileUploadTimeForm">
+        update messages m
+        <set>
+            <if test="fileUploadTime != null">
+                m.file_upload_time = #{fileUploadTime}
+            </if>
+        </set>
+        where m.message_no = #{messageNo}
+    </update>
+
+</mapper>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.DepartmentDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.Department">
+
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, department, second_department, first_person, first_tel, first_address,
+        second_id, update_name, update_time, second_person, second_tel, second_address, first_no,
+        second_no
+    </sql>
+
+    <select id="getDepartmentList" parameterType="com.bs.regsystemapi.modal.dto.department.QueryDepartmentForm" resultType="com.bs.regsystemapi.entity.Department">
+        select <include refid="baseColumns"></include>
+        from department
+        <where>
+            is_delete = '1'
+            <if test="secondDepartment != null">
+                and second_department like concat('%', #{secondDepartment}, '%')
+            </if>
+            <if test="department != null">
+                and department = #{department}
+            </if>
+        </where>
+    </select>
+
+    <select id="getFirstDepartList" resultType="com.bs.regsystemapi.modal.vo.FirstDepartmentInfo">
+        select department, first_person, first_tel, first_address, first_no
+        from department
+        where is_delete = '1'
+        group by department.department
+    </select>
+
+    <select id="getDepartmentInfo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.entity.Department">
+        select <include refid="baseColumns"></include>
+        from department
+        where second_id = #{secondId} and is_delete = '1'
+    </select>
+    
+    <update id="updateDepartmentInfo" parameterType="com.bs.regsystemapi.entity.Department">
+        update department
+        <set>
+            <if test="department != null">
+                department = #{department},
+            </if>
+            <if test="secondDepartment != null">
+                second_department = #{secondDepartment},
+            </if>
+            <if test="firstPerson != null">
+                first_person = #{firstPerson},
+            </if>
+            <if test="firstTel != null">
+                first_tel = #{firstTel},
+            </if>
+            <if test="firstAddress != null">
+                first_address = #{firstAddress},
+            </if>
+            <if test="secondPerson != null">
+                second_person = #{secondPerson},
+            </if>
+            <if test="secondTel != null">
+                second_tel = #{secondTel},
+            </if>
+            <if test="secondAddress != null">
+                second_address = #{secondAddress},
+            </if>
+            <if test="updateName != null">
+                update_name = #{updateName},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        where second_id = #{secondId}
+    </update>
+
+    <select id="getMainValue" resultType="com.bs.regsystemapi.modal.vo.drug.DrugLabelInfo">
+        select d.department as label, left(d.second_id, 3) as value
+        from department d
+        group by d.department
+    </select>
+
+    <select id="getSecondValue" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.drug.DrugLabelInfo">
+        select d.second_department as label , d.second_id as value
+        from department d
+        where left(d.second_id, 3) = #{secondId}
+    </select>
+</mapper>

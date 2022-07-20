@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.PatientDao">
+
+    <sql id="baseColumns">
+        id,pat_no,pat_nickName,pat_imgsrc,pat_gender,pat_realName,pat_phone,pat_address,
+        pat_mail,pat_password,pat_account,is_delete
+    </sql>
+
+    <select id="getPatInfoByLogin" parameterType="com.bs.regsystemapi.modal.dto.patient.PatientRequestForm" resultType="com.bs.regsystemapi.entity.PatientEntity">
+        select <include refid="baseColumns"></include>
+        from `patient`
+        where pat_account = #{patAccount} and pat_password = #{patPassword} and is_delete = 1
+    </select>
+
+    <select id="selectByOpenId" parameterType="java.lang.String" resultType="com.bs.regsystemapi.entity.PatientEntity">
+        select <include refid="baseColumns"></include>
+        from `patient`
+        where pat_no = #{openId} and is_delete = '1'
+    </select>
+
+    <select id="getPatientList" parameterType="com.bs.regsystemapi.modal.dto.patient.GetPatientListForm" resultType="com.bs.regsystemapi.modal.vo.patient.PatientListInfo">
+        select <include refid="baseColumns"></include>
+        from `patient`
+        <where>
+            1=1 and is_delete = '1'
+            <if test="patRealName != null ">
+               and pat_realName like concat('%', #{patRealName}, '%')
+            </if>
+        </where>
+    </select>
+    <select id="getBasePatientInfo"  parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.patient.PatientInfo">
+        select <include refid="baseColumns"></include>
+        from `patient`
+        where pat_no = #{patNo} and is_delete = '1'
+    </select>
+
+</mapper>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.AreaDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.Area">
+
+    </resultMap>
+
+    <sql id="baseColumns">
+        AREA_ID, AREA_NAME, PARENT_ID, IS_DELETE, CREATE_TIME, MODIFY_TIME
+    </sql>
+
+    <select id="getParentList" resultType="com.bs.regsystemapi.modal.vo.province.ParentProvinceList">
+        select b.area_id as value,
+               b.area_name as label
+        from area a
+                 left join area b on a.area_id = b.parent_id
+        where a.parent_id = 1
+          and a.is_delete = 0
+          and b.is_delete = 0
+        order by b.area_id asc
+    </select>
+
+    <select id="getChildList" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.province.ChildProvinceList">
+        select a.area_id as value,
+               a.area_name as label
+        from area a
+        where a.parent_id = #{parentId}
+          and a.is_delete = 0
+        order by a.area_id asc
+    </select>
+
+</mapper>

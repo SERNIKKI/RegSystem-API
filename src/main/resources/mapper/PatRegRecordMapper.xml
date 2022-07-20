@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.PatRegRecordDao">
+
+    <sql id="baseColumns">
+        id,person_no,reg_no,doctor_no,visit_time,reg_state,illness_detail,is_success,
+        visit_data,person_remark,creat_time,is_delete
+    </sql>
+
+    <select id="getPatRegRecordByDoctorNo"  parameterType="com.bs.regsystemapi.modal.dto.patregrecord.PatRegRecordListForm"  resultType="com.bs.regsystemapi.entity.PatRegRecord">
+        select *
+        from `pat_regrecord`
+        where doctor_no = #{doctorNo} and visit_data = #{visitDate} and is_delete = "1"
+        order by creat_time desc
+    </select>
+    <select id="getPatRegRecordByOther" parameterType="com.bs.regsystemapi.modal.dto.patregrecord.PatRegRecordRequestForm"
+            resultType="com.bs.regsystemapi.modal.vo.patpayrecord.PatPayRecordByOtherInfo">
+        SELECT
+        p.*,u.user_real_name,d.second_department
+        FROM
+        `pat_regrecord` p
+        LEFT JOIN `user` u ON p.doctor_no = u.user_no
+        LEFT JOIN `department` d on u.user_department = d.second_id
+        <where>
+            1=1
+            <if test="userRealName != null and userRealName != ''">
+                AND u.user_real_name LIKE CONCAT( '%',#{userRealName}, '%' )
+            </if>
+            <if test="userDepartment != null and userDepartment != ''">
+                AND d.second_department LIKE CONCAT( '%', #{userDepartment}, '%' )
+            </if>
+            <if test="visitDate != null and visitDate != ''">
+                AND p.visit_data = #{visitDate}
+            </if>
+        </where>
+        order by p.creat_time desc
+    </select>
+    <select id="getPatRegRecordByPatNo" parameterType="com.bs.regsystemapi.modal.dto.patregrecord.GetPatRegRecordByPatNoForm"
+            resultType="com.bs.regsystemapi.modal.dto.patregrecord.PatRegRecordDetailInfo">
+        SELECT
+            p.*,
+            pr.order_state,
+            d.second_department,
+            pp.person_name,
+            u.user_real_name,
+            u.user_position,
+            u.reserve_price
+        FROM
+            `pat_regrecord` p
+            LEFT JOIN `user` u on p.doctor_no = u.user_no
+            LEFT JOIN `department` d ON u.user_department = d.second_id
+            LEFT JOIN `pat_person` pp ON p.person_no = pp.person_no
+            LEFT JOIN `pat_payrecord` pr ON p.reg_no = pr.reg_no
+        WHERE
+            pp.pat_no = #{patNo}
+        order by p.creat_time desc
+    </select>
+    <select id="getPatRegRecordByRegStateAndPatNo" parameterType="com.bs.regsystemapi.modal.dto.patregrecord.GetPatRegRecordByOtherAndPatNoForm"
+            resultType="com.bs.regsystemapi.modal.dto.patregrecord.PatRegRecordDetailInfo">
+        SELECT
+        p.*,
+        pr.order_state,
+        pr.order_no,
+        d.second_department,
+        pp.person_name,
+        u.user_real_name,
+        u.user_position,
+        u.reserve_price
+        FROM
+        `pat_regrecord` p
+        LEFT JOIN `user` u ON p.doctor_no = u.user_no
+        LEFT JOIN `department` d ON u.user_department = d.second_id
+        LEFT JOIN `pat_person` pp ON p.person_no = pp.person_no
+        LEFT JOIN `pat_payrecord` pr ON p.reg_no = pr.reg_no
+        <where>
+            1=1
+            AND pp.pat_no = #{patNo}
+            <if test="regState != null and regState != ''">
+                AND p.reg_state = #{regState}
+            </if>
+            <if test="orderState != null and orderState != ''">
+                AND pr.order_state = #{orderState}
+            </if>
+        </where>
+        order by p.creat_time desc
+
+    </select>
+    <select id="getRegInfo" parameterType="com.bs.regsystemapi.modal.dto.patregrecord.QueryRegInfoForm" resultType="com.bs.regsystemapi.modal.vo.patpayrecord.RegInfo">
+        select pr.*, u.user_real_name ,u.user_no , d.department ,d.second_department ,pp.person_name , pp.person_no ,p.pat_nickName ,p.pat_no
+        from pat_regrecord pr , `user` u , department d , pat_person pp , patient p
+        <where>
+            pr.person_no = pp.person_no and pr.doctor_no = u.user_no and u.user_department = d.second_id and pr.is_delete = '1' and p.pat_no = pp.pat_no
+            <if test="doctorNo != null">
+                and pr.doctor_no = #{doctorNo}
+            </if>
+            <if test="userRealName != null">
+                and u.user_real_name like concat('%', #{userRealName}, '%')
+            </if>
+            <if test="secondDepartment != null">
+                and d.second_department like concat('%', #{secondDepartment}, '%')
+            </if>
+            <if test="personName != null">
+                and pp.person_name like concat('%', #{personName}, '%')
+            </if>
+            <if test="patNickName != null">
+                and p.pat_nickName like concat('%', #{patNickName}, '%')
+            </if>
+            <if test="beginTime != null and endTime == null">
+                and visit_data &gt;= #{beginTime}
+            </if>
+            <if test="beginTime == null and endTime != null">
+                and visit_data &lt;= #{endTime}
+            </if>
+            <if test="beginTime != null and endTime != null">
+                and visit_data &lt;= #{endTime} and visit_data &gt;= #{beginTime}
+            </if>
+        </where>
+        order by pr.creat_time desc
+    </select>
+</mapper>
+

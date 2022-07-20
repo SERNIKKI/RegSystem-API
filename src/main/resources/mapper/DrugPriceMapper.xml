@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.DrugPriceDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.DrugPrice">
+
+    </resultMap>
+
+    <sql id="baseColumns">
+        d.id, d.drug_no, d.drug_type, d.drug_price, d.drug_unit, d.drug_price_insurance,
+        d.drug_max, d.drug_max_insurance, d.drug_min, d.drug_min_insurance, d.create_name, d.create_time, d.update_name,
+        d.update_time, d.is_insurance
+    </sql>
+
+    <select id="getNotPriceList" resultType="com.bs.regsystemapi.modal.vo.drug.NotPriceInfo">
+        select d.drug_no as drug_no ,d.drug_name as drug_name, '1' as drug_type
+        from drug d
+        where d.drug_genus = '1' and d.drug_no not in (select dp.drug_no from drug_price dp)
+        union all
+        select d.drug_no as drug_no ,d.drug_name as drug_name, '2' as drug_type
+        from drug d
+        where d.drug_genus = '2' and d.drug_no not in (select dp.drug_no from drug_price dp)
+        union all
+        select dh.herb_no as drug_no ,dh.herb_name as drug_name, '3' as drug_type
+        from drug_herbs dh
+        where dh.herb_no not in (select dp.drug_no from drug_price dp)
+    </select>
+
+    <select id="getPriceList" resultType="com.bs.regsystemapi.modal.vo.drug.PriceInfo" parameterType="com.bs.regsystemapi.modal.dto.drug.QueryPriceForm">
+        select t.* from (
+            select <include refid="baseColumns"></include>, d1.drug_name as drug_name
+            from drug_price d, drug d1
+            where d.drug_no = d1.drug_no
+            union all
+            select <include refid="baseColumns"></include>, dh.herb_name as drug_name
+            from drug_price d, drug_herbs dh
+            where d.drug_no = dh.herb_no
+        ) t
+        <where>
+            1 = 1
+            <if test="drugName != null">
+                and t.drug_name like concat('%', #{drugName}, '%')
+            </if>
+            <if test="drugType != null">
+                and t.drug_type = #{drugType}
+            </if>
+            <if test="isInsurance != null">
+                and t.is_insurance = #{isInsurance}
+            </if>
+        </where>
+        order by t.create_time desc
+    </select>
+
+    <select id="getPriceInfo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.drug.PriceInfo">
+        select <include refid="baseColumns"></include>, d1.drug_name as drug_name
+        from drug_price d, drug d1
+        where d.drug_no = d1.drug_no and d.drug_no = #{drugNo}
+        union all
+        select <include refid="baseColumns"></include>, dh.herb_name as drug_name
+        from drug_price d, drug_herbs dh
+        where d.drug_no = dh.herb_no and d.drug_no = #{drugNo}
+    </select>
+</mapper>

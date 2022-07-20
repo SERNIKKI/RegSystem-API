@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.DrugStockDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.DrugStock">
+
+    </resultMap>
+
+    <sql id="baseColumns">
+        d.id, d.drug_no, d.drug_type, d.count_Jan, d.count_Feb, d.count_Mar,
+        d.count_Apr, d.count_May, d.count_Jun, d.count_Jul, d.count_Aug, d.count_Sep, d.count_Oct,
+        d.count_Nov, d.count_Dec, d.count_total, d.count_sold, d.update_time, d.update_name
+    </sql>
+
+    <select id="getNotStockList" resultType="com.bs.regsystemapi.modal.vo.drug.NotStockInfo">
+        select d.drug_no as drug_no ,d.drug_name as drug_name, '1' as drug_type
+        from drug d
+        where d.drug_genus = '1' and d.drug_no not in (select ds.drug_no from drug_stock ds)
+        union all
+        select d.drug_no as drug_no ,d.drug_name as drug_name, '2' as drug_type
+        from drug d
+        where d.drug_genus = '2' and d.drug_no not in (select ds.drug_no from drug_stock ds)
+        union all
+        select dh.herb_no as drug_no ,dh.herb_name as drug_name, '3' as drug_type
+        from drug_herbs dh
+        where dh.herb_no not in (select ds.drug_no from drug_stock ds);
+    </select>
+
+    <select id="getStockList" resultType="com.bs.regsystemapi.modal.vo.drug.StockInfo" parameterType="com.bs.regsystemapi.modal.dto.drug.QueryStockForm">
+        select t.* from (
+            select <include refid="baseColumns"></include>, d2.drug_name as drug_name, dp.drug_unit as drug_unit
+            from drug_stock d, drug d2, drug_price dp
+            where d.drug_no = d2.drug_no and d.drug_no = dp.drug_no
+            union all
+            select <include refid="baseColumns"></include>, dh.herb_name as drug_name, dp.drug_unit as drug_unit
+            from drug_stock d, drug_herbs dh, drug_price dp
+            where d.drug_no = dh.herb_no and d.drug_no = dp.drug_no
+        ) t
+        <where>
+            1 = 1
+            <if test="drugName != null">
+                and t.drug_name like concat('%', #{drugName}, '%')
+            </if>
+            <if test="drugType != null">
+                and t.drug_type = #{drugType}
+            </if>
+        </where>
+        order by t.update_time desc
+    </select>
+
+    <select id="getStockInfo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.drug.StockInfo">
+        select <include refid="baseColumns"></include>, d2.drug_name as drug_name, dp.drug_unit as drug_unit
+        from drug_stock d, drug d2, drug_price dp
+        where d.drug_no = d2.drug_no and d.drug_no = #{drugNo} and d.drug_no = dp.drug_no
+        union all
+        select <include refid="baseColumns"></include>, dh.herb_name as drug_name, dp.drug_unit as drug_unit
+        from drug_stock d, drug_herbs dh, drug_price dp
+        where d.drug_no = dh.herb_no and d.drug_no = #{drugNo} and d.drug_no = dp.drug_no
+    </select>
+
+    <select id="getStockInfoForMonth" parameterType="com.bs.regsystemapi.modal.dto.drug.QueryStockForMonthForm" resultType="com.bs.regsystemapi.modal.vo.drug.StockForMonthInfo">
+        select d.drug_no, d.drug_type, d.count_total, d.count_sold,
+        <if test="month == 1">
+            d.count_Jan as `count`,
+        </if>
+        <if test="month == 2">
+            d.count_Feb as `count`,
+        </if>
+        <if test="month == 3">
+            d.count_Mar as `count`,
+        </if>
+        <if test="month == 4">
+            d.count_Apr as `count`,
+        </if>
+        <if test="month == 5">
+            d.count_May as `count`,
+        </if>
+        <if test="month == 6">
+            d.count_Jun as `count`,
+        </if>
+        <if test="month == 7">
+            d.count_Jul as `count`,
+        </if>
+        <if test="month == 8">
+            d.count_Aug as `count`,
+        </if>
+        <if test="month == 9">
+            d.count_Sep as `count`,
+        </if>
+        <if test="month == 10">
+            d.count_Oct as `count`,
+        </if>
+        <if test="month == 11">
+            d.count_Nov as `count`,
+        </if>
+        <if test="month == 12">
+            d.count_Jan as `count`,
+        </if>
+        d2.drug_name as drug_name, dp.drug_unit as drug_unit
+        from drug_stock d, drug d2, drug_price dp
+        where d.drug_no = d2.drug_no and d.drug_no = #{drugNo} and d.drug_no = dp.drug_no
+        union all
+        select d.drug_no, d.drug_type, d.count_total, d.count_sold,
+        <if test="month == 1">
+            d.count_Jan as `count`,
+        </if>
+        <if test="month == 2">
+            d.count_Feb as `count`,
+        </if>
+        <if test="month == 3">
+            d.count_Mar as `count`,
+        </if>
+        <if test="month == 4">
+            d.count_Apr as `count`,
+        </if>
+        <if test="month == 5">
+            d.count_May as `count`,
+        </if>
+        <if test="month == 6">
+            d.count_Jun as `count`,
+        </if>
+        <if test="month == 7">
+            d.count_Jul as `count`,
+        </if>
+        <if test="month == 8">
+            d.count_Aug as `count`,
+        </if>
+        <if test="month == 9">
+            d.count_Sep as `count`,
+        </if>
+        <if test="month == 10">
+            d.count_Oct as `count`,
+        </if>
+        <if test="month == 11">
+            d.count_Nov as `count`,
+        </if>
+        <if test="month == 12">
+            d.count_Jan as `count`,
+        </if>
+        dh.herb_name as drug_name, dp.drug_unit as drug_unit
+        from drug_stock d, drug_herbs dh, drug_price dp
+        where d.drug_no = dh.herb_no and d.drug_no = #{drugNo} and d.drug_no = dp.drug_no
+    </select>
+    
+    <select id="getStockReport" resultType="com.bs.regsystemapi.modal.vo.drug.StockReportInfo" parameterType="com.bs.regsystemapi.modal.dto.drug.QueryStockReportForm">
+        select t.* from (
+            select d.drug_type,
+            <if test="month == 1">
+                d.count_Jan as `value`,
+            </if>
+            <if test="month == 2">
+                d.count_Feb as `value`,
+            </if>
+            <if test="month == 3">
+                d.count_Mar as `value`,
+            </if>
+            <if test="month == 4">
+                d.count_Apr as `value`,
+            </if>
+            <if test="month == 5">
+                d.count_May as `value`,
+            </if>
+            <if test="month == 6">
+                d.count_Jun as `value`,
+            </if>
+            <if test="month == 7">
+                d.count_Jul as `value`,
+            </if>
+            <if test="month == 8">
+                d.count_Aug as `value`,
+            </if>
+            <if test="month == 9">
+                d.count_Sep as `value`,
+            </if>
+            <if test="month == 10">
+                d.count_Oct as `value`,
+            </if>
+            <if test="month == 11">
+                d.count_Nov as `value`,
+            </if>
+            <if test="month == 12">
+                d.count_Jan as `value`,
+            </if>
+            <if test="month == 13">
+                d.count_sold as `value`,
+            </if>
+            <if test="month == 14">
+                d.count_total as `value`,
+            </if>
+            d2.drug_name as name
+            from drug_stock d, drug d2
+            where d.drug_no = d2.drug_no
+            union all
+            select d.drug_type,
+            <if test="month == 1">
+                d.count_Jan as `value`,
+            </if>
+            <if test="month == 2">
+                d.count_Feb as `value`,
+            </if>
+            <if test="month == 3">
+                d.count_Mar as `value`,
+            </if>
+            <if test="month == 4">
+                d.count_Apr as `value`,
+            </if>
+            <if test="month == 5">
+                d.count_May as `value`,
+            </if>
+            <if test="month == 6">
+                d.count_Jun as `value`,
+            </if>
+            <if test="month == 7">
+                d.count_Jul as `value`,
+            </if>
+            <if test="month == 8">
+                d.count_Aug as `value`,
+            </if>
+            <if test="month == 9">
+                d.count_Sep as `value`,
+            </if>
+            <if test="month == 10">
+                d.count_Oct as `value`,
+            </if>
+            <if test="month == 11">
+                d.count_Nov as `value`,
+            </if>
+            <if test="month == 12">
+                d.count_Jan as `value`,
+            </if>
+            <if test="month == 13">
+                d.count_sold as `value`,
+            </if>
+            <if test="month == 14">
+                d.count_total as `value`,
+            </if>
+            dh.herb_name as name
+            from drug_stock d, drug_herbs dh
+            where d.drug_no = dh.herb_no
+        ) t
+        <where>
+            <if test="drugType != null">
+                t.drug_type = #{drugType}
+            </if>
+        </where>
+        <if test="sort == 'desc'">
+            order by t.value desc
+        </if>
+        <if test="sort == 'asc'">
+            order by t.value asc
+        </if>
+        limit #{limit}
+    </select>
+
+    <select id="getAllMonthReport" resultType="com.bs.regsystemapi.modal.vo.drug.CountForMonthInfo">
+        select sum(d.count_Jan) as jan ,sum(d.count_Feb) as feb ,sum(d.count_Mar) as mar ,
+            sum(d.count_Apr) as apr ,sum(d.count_May) as may ,sum(d.count_Jun) as jun ,sum(d.count_Jul) as jul ,
+            sum(d.count_Aug) as aug ,sum(d.count_Sep) as sep ,sum(d.count_Oct) as oct ,sum(d.count_Nov) as nov ,
+            sum(d.count_Dec) as `dec`
+        from drug_stock d
+    </select>
+
+    <select id="getEveryMonthReport" resultType="com.bs.regsystemapi.modal.vo.drug.StockInfo" parameterType="com.bs.regsystemapi.modal.dto.drug.QueryEveryMonthReportForm">
+        select t.* from (
+            select <include refid="baseColumns"></include>, d2.drug_name as drug_name
+            from drug_stock d, drug d2
+            where d.drug_no = d2.drug_no
+            union all
+            select <include refid="baseColumns"></include>, dh.herb_name as drug_name
+            from drug_stock d, drug_herbs dh
+            where d.drug_no = dh.herb_no
+        ) t
+        <where>
+            <if test="drugType != null">
+                t.drug_type = #{drugType}
+            </if>
+        </where>
+        <if test="sort == 'desc'">
+            order by t.count_sold desc
+        </if>
+        <if test="sort == 'asc'">
+            order by t.count_sold asc
+        </if>
+        limit #{limit}
+    </select>
+
+    <update id="updateStockInfo" parameterType="com.bs.regsystemapi.modal.vo.drug.StockInfo">
+        update drug_stock
+        set count_total = count_total + #{countTotal}, update_time = #{updateTime}, update_name = #{updateName}
+        where drug_no = #{drugNo}
+    </update>
+
+    <update id="updateStockInfo2" parameterType="com.bs.regsystemapi.modal.vo.drug.StockInfo">
+        update drug_stock
+        set count_total = count_total - #{countTotal}, update_time = #{updateTime}, update_name = #{updateName}
+        where drug_no = #{drugNo}
+    </update>
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.PatPayRecordDao">
+
+    <sql id="baseColumns">
+        id,pat_no,doctor_no,user_cost,order_no,order_state,pay_type,pay_mode,
+        pay_time,person_no,reg_no,creat_time,finish_time,is_delete
+    </sql>
+
+    <select id="getPatPayRecordList" parameterType="com.bs.regsystemapi.modal.dto.patpayrecord.GetPatPayRecordListForm" resultType="com.bs.regsystemapi.entity.PatPayRecord">
+        select <include refid="baseColumns"></include>
+        from `pat_payrecord`
+        <where>
+            1=1
+            <if test="userRealName != null or userDepartment != null">
+                and doctor_no
+                in (
+                select user_no
+                from user
+                where
+                1=1
+                <if test="userRealName != null">
+                    and	user_real_name
+                    like concat('%', #{userRealName}, '%')
+                </if>
+                <if test="userDepartment != null">
+                    and user_department
+                    in (
+                    select second_id
+                    from department
+                    where
+                    1=1
+                    and second_department
+                    like concat('%', #{userDepartment}, '%')
+                    )
+                </if>
+                )
+            </if>
+            <if test="patRealName != null">
+                and pat_no
+                in (
+                select pat_no
+                from patient
+                where pat_realName
+                like concat('%', #{patRealName}, '%')
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="getOrderList" resultType="com.bs.regsystemapi.modal.vo.patpayrecord.OrderListInfo" parameterType="com.bs.regsystemapi.modal.dto.patpayrecord.QueryOrderListForm">
+        select pp.*, pp2.person_name ,pp2.person_no ,pr.visit_data ,pr.illness_detail ,u.user_real_name ,d.second_department, pp2.person_phone
+        from pat_payrecord pp ,pat_person pp2 ,pat_regrecord pr ,`user` u ,department d
+        <where>
+            pp.person_no = pp2.person_no and pr.reg_no = pp.reg_no and u.user_no = pp.doctor_no and u.user_department = d.second_id and pp.is_delete = '1'
+            <if test="personName != null">
+                and person_name like concat('%', #{personName}, '%')
+            </if>
+            <if test="userRealName != null">
+                and user_real_name like concat('%', #{userRealName}, '%')
+            </if>
+            <if test="secondDepartment != null">
+                and second_department like concat('%', #{secondDepartment}, '%')
+            </if>
+            <if test="beginTime != null and endTime == null">
+                and visit_data &gt; #{beginTime}
+                and visit_data &gt;= #{beginTime}
+            </if>
+            <if test="beginTime == null and endTime != null">
+                and visit_data &lt; #{endTime}
+                and visit_data &lt;= #{endTime}
+            </if>
+            <if test="beginTime != null and endTime != null">
+                and visit_data &lt; #{endTime} and visit_data &gt; #{beginTime}
+                and visit_data &lt;= #{endTime} and visit_data &gt;= #{beginTime}
+            </if>
+            <if test="doctorNo != null">
+                and doctor_no = #{doctorNo}
+            </if>
+        </where>
+        order by visit_data desc
+    </select>
+</mapper>

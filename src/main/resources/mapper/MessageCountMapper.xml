@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.MessageCountDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.MessageCount">
+        <result property="id" column="id"/>
+        <result property="actorNo" column="actor_no"/>
+        <result property="receiverNo" column="receiver_no"/>
+        <result property="total" column="total"/>
+        <result property="notRead" column="not_read"/>
+        <result property="isRead" column="is_read"/>
+        <result property="isSuccess" column="is_success"/>
+        <result property="isError" column="is_error"/>
+        <result property="lastTime" column="last_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, actor_no, receiver_no, total, not_read, is_read, is_success, is_error, last_time,remark
+    </sql>
+
+    <insert id="updateMessageCount" parameterType="com.bs.regsystemapi.entity.MessageCount">
+        INSERT INTO
+        messagecount(`actor_no`,`receiver_no`,`total`,`not_read`,`is_read`,`is_success`,`is_error`,`last_time`,`remark`)
+        VALUES(#{actorNo}, #{receiverNo}, 1, 1, 0, 1, 0, #{lastTime}, #{remark})
+        ON DUPLICATE KEY
+        update
+        total = total + 1,not_read = not_read + 1, is_success = is_success + #{isSuccess},is_error = is_error + #{isError},
+         last_time = #{lastTime}, remark = #{remark}
+    </insert>
+
+    <select id="getNotRead" parameterType="com.bs.regsystemapi.modal.dto.message.UpdateReadStatusForm" resultType="java.lang.Integer">
+        select not_read
+        from messagecount
+        where actor_no = #{actorNo} and receiver_no = #{receiverNo}
+    </select>
+
+    <update id="clearNotRead" parameterType="com.bs.regsystemapi.modal.dto.message.UpdateReadStatusForm">
+        update messagecount
+        set is_read = is_read + not_read, not_read = 0
+        where actor_no = #{actorNo} and receiver_no = #{receiverNo}
+    </update>
+
+    <select id="getNotReadCount" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select sum(not_read) from messagecount where receiver_no = #{receiverNo}
+    </select>
+    
+</mapper>

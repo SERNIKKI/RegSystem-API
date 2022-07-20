@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.DrugHerbsDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.DrugHerbs">
+
+    </resultMap>
+
+    <sql id="baseColumns">
+        d.id, d.herb_name, d.herb_pinyin, d.herb_action, d.herb_origin, d.herb_fundamental,
+        d.herb_place, d.herb_collect, d.herb_concoct, d.herb_storage, d.herb_prop, d.herb_return, d.herb_apply,
+        d.herb_efficacy, d.herb_usage, d.herb_abstract, d.herb_ingredient,d.herb_ident,
+        d.create_time, d.create_name, d.update_time, d.update_name, d.herb_image, d.herb_no, d.herb_adverse,
+        d.herb_remark
+    </sql>
+
+    <select id="getHerbList" parameterType="com.bs.regsystemapi.modal.dto.drug.QueryHerbsForm" resultType="com.bs.regsystemapi.modal.vo.drug.HerbInfo">
+        select <include refid="baseColumns"></include>, dt.main_type ,dt.sub_type
+        from drug_herbs d, drug_type dt
+        <where>
+            d.herb_action = dt.sub_id and d.is_delete = '1'
+            <if test="herbName != null">
+                and d.herb_name like concat('%', #{herbName}, '%')
+            </if>
+            <if test="herbPinyin != null">
+                and d.herb_pinyin like concat('%', #{herbPinyin}, '%')
+            </if>
+            <if test="herbAction != null">
+                and d.herb_action = #{herbAction}
+            </if>
+            <if test="herbOrigin != null">
+                and d.herb_origin like concat('%', #{herbOrigin}, '%')
+            </if>
+            <if test="herbPlace != null">
+                and d.herb_place like concat('%', #{herbPlace}, '%')
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="getHerbInfo" resultType="com.bs.regsystemapi.modal.vo.drug.HerbInfo" parameterType="java.lang.String">
+        select <include refid="baseColumns"></include>, dt.main_type ,dt.sub_type
+        from drug_herbs d, drug_type dt
+        where d.herb_no = #{herbNo} and d.herb_action = dt.sub_id and d.is_delete = '1'
+    </select>
+
+    <update id="updateHerbInfo" parameterType="com.bs.regsystemapi.entity.DrugHerbs">
+        update drug_herbs
+        <set>
+            <if test="herbName != null">
+                herb_name = #{herbName},
+            </if>
+            <if test="herbPinyin != null">
+                herb_pinyin = #{herbPinyin},
+            </if>
+            <if test="herbAction != null">
+                herb_action = #{herbAction},
+            </if>
+            <if test="herbOrigin != null">
+                herb_origin = #{herbOrigin},
+            </if>
+            <if test="herbFundamental != null">
+                herb_fundamental = #{herbFundamental},
+            </if>
+            <if test="herbPlace != null">
+                herb_place = #{herbPlace},
+            </if>
+            <if test="herbCollect != null">
+                herb_collect = #{herbCollect},
+            </if>
+            <if test="herbConcoct != null">
+                herb_concoct = #{herbConcoct},
+            </if>
+            <if test="herbStorage != null">
+                herb_storage = #{herbStorage},
+            </if>
+            <if test="herbProp != null">
+                herb_prop = #{herbProp},
+            </if>
+            <if test="herbReturn != null">
+                herb_return = #{herbReturn},
+            </if>
+            <if test="herbApply != null">
+                herb_apply = #{herbApply},
+            </if>
+            <if test="herbEfficacy != null">
+                herb_efficacy = #{herbEfficacy},
+            </if>
+            <if test="herbUsage != null">
+                herb_usage = #{herbUsage},
+            </if>
+            <if test="herbAbstract != null">
+                herb_abstract = #{herbAbstract},
+            </if>
+            <if test="herbIngredient != null">
+                herb_ingredient = #{herbIngredient},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="createName != null">
+                create_name = #{createName},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="updateName != null">
+                update_name = #{updateName},
+            </if>
+            <if test="herbImage != null">
+                herb_image = #{herbImage},
+            </if>
+            <if test="herbAdverse != null">
+                herb_adverse = #{herbAdverse},
+            </if>
+            <if test="herbRemark != null">
+                herb_remark = #{herbRemark},
+            </if>
+            <if test="herbIdent != null">
+                herb_ident = #{herbIdent}
+            </if>
+        </set>
+        where herb_no = #{herbNo}
+    </update>
+
+    <update id="deleteHerb" parameterType="com.bs.regsystemapi.entity.DrugHerbs">
+        update drug_herbs
+        set is_delete = '0', update_name = #{updateName}, update_time = #{updateTime}
+        where herb_no = #{herbNo}
+    </update>
+
+    <update id="recoverHerb" parameterType="com.bs.regsystemapi.entity.DrugHerbs">
+        update drug_herbs
+        set is_delete = '1', update_name = #{updateName}, update_time = #{updateTime}
+        where herb_no = #{herbNo}
+    </update>
+
+    <select id="getDeleteList" resultType="com.bs.regsystemapi.modal.vo.drug.HerbInfo">
+        select <include refid="baseColumns"></include>, dt.main_type ,dt.sub_type
+        from drug_herbs d, drug_type dt
+        where d.herb_action = dt.sub_id and d.is_delete = '0'
+        order by update_time desc
+    </select>
+
+    <select id="getHerbs" parameterType="com.bs.regsystemapi.modal.dto.drug.QueryDoctorHerbsForm" resultType="com.bs.regsystemapi.modal.vo.drug.DoctorHerbInfo">
+        select dh.herb_no ,dh.herb_name  ,dh.herb_pinyin  ,dh.herb_efficacy , dh.herb_usage ,dt.sub_type ,dp.drug_price ,dp.drug_price_insurance ,dp.drug_unit,ds.count_total  ,dp.is_insurance
+        from drug_herbs dh, drug_type dt ,drug_price dp, drug_stock ds
+        <where>
+            dh.herb_no = dp.drug_no and dh.herb_action = dt.sub_id and dh.herb_no = ds.drug_no
+            <if test="herbName != null">
+                and d.herb_name like concat('%', #{herbName}, '%')
+            </if>
+            <if test="herbPinyin != null">
+                and d.herb_pinyin like concat('%', #{herbPinyin}, '%')
+            </if>
+            <if test="herbEfficacy != null">
+                and d.herb_efficacy = like concat('%', #{herbEfficacy}, '%')
+            </if>
+            <if test="subType != null">
+                and d.sub_type = like concat('%', #{subType}, '%')
+            </if>
+        </where>
+        order by dh.create_time desc
+    </select>
+</mapper>

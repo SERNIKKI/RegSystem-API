@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.BulletinDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.Bulletin">
+
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, bulletin_no, bulletin_title, bulletin_contact, bulletin_name, begin_time, end_time, is_valid,
+        bulletin_image, is_delete, update_name, update_time, bulletin_department
+    </sql>
+
+    <select id="getBulletinList" parameterType="com.bs.regsystemapi.modal.dto.bulletin.QueryBulletinForm" resultType="com.bs.regsystemapi.entity.Bulletin">
+        select <include refid="baseColumns"></include>
+        from bulletin
+        <where>
+            is_delete = '1'
+            <if test="bulletinTitle != null">
+                and bulletin_title like concat('%', #{bulletinTitle}, '%')
+            </if>
+            <if test="bulletinName != null">
+                and bulletin_title like concat('%', #{bulletinName}, '%')
+            </if>
+            <if test="beginTime != null">
+                and begin_time &lt;= #{beginTime}
+            </if>
+            <if test="bulletinDepartment != null">
+                and bulletin_department like concat('%', #{bulletinDepartment}, '%')
+            </if>
+            <if test="endTime != null">
+                and end_time &gt;= #{endTime}
+            </if>
+        </where>
+        order by update_time desc
+    </select>
+
+    <select id="getValidBulletin" resultType="com.bs.regsystemapi.entity.Bulletin">
+        select <include refid="baseColumns"></include>
+        from bulletin
+        where is_delete = '1' and is_valid = '1'
+        order by update_time desc
+        limit 10
+    </select>
+
+    <select id="getBulletinInfo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.entity.Bulletin">
+        select <include refid="baseColumns"></include>
+        from bulletin
+        where bulletin_no = #{bulletinNo} and is_delete = '1'
+    </select>
+
+    <update id="deleteBulletin" parameterType="java.lang.String">
+        update bulletin
+        set is_delete = '0'
+        where bulletin_no = #{bulletinNo}
+    </update>
+
+    <update id="recoverBulletin" parameterType="java.lang.String">
+        update bulletin
+        set is_delete = '1'
+        where bulletin_no = #{bulletinNo}
+    </update>
+</mapper>

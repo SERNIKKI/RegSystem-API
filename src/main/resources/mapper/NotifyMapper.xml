@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.NotifyDao">
+    <resultMap id="testMap" type="com.bs.regsystemapi.entity.Notify">
+
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, notify_no, notify_type, notify_title, notify_content, notify_object, system_no, is_read,
+        is_send, send_time, create_name, is_delete
+    </sql>
+
+    <select id="getNotifyList" resultType="com.bs.regsystemapi.modal.vo.notify.NotifyInfo" parameterType="com.bs.regsystemapi.modal.dto.notify.QueryNotifyForm">
+        select n.notify_no ,n.notify_type ,n.notify_title ,n.notify_content ,n.send_time ,n.create_name ,t.readNum, t2.sendNum, count(n.notify_no) as total
+        from notify n, (select SUM(if(n2.is_read = '1', 1, 0)) as readNum, n2.notify_no from notify n2 group by n2.notify_no) t,
+        (select SUM(if(n3.is_send = '1', 1, 0)) as sendNum, n3.notify_no from notify n3 group by n3.notify_no) t2
+        <where>
+            n.notify_no = t.notify_no and n.notify_no = t2.notify_no
+            <if test="notifyTitle != null">
+                and n.notify_title like contact('%', #{notifyTitle}, '%')
+            </if>
+            <if test="notifyType != null">
+                and n.notify_type = #{notifyType}
+            </if>
+        </where>
+        group by n.notify_no
+        order by n.send_time desc
+    </select>
+
+    <select id="getNotSendList" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.notify.NotSend">
+        select n.system_no ,n.notify_object ,u.user_real_name
+        from notify n ,`user` u
+        where n.notify_object = u.user_no and n.is_send = '0' and notify_no = #{notifyNo} and n.is_delete = '1'
+    </select>
+
+    <update id="deleteNotify" parameterType="java.lang.String">
+        update notify set is_delete = '0'
+        where notify_no = #{notifyNo}
+    </update>
+    
+    <update id="deleteNotifyByUser" parameterType="java.lang.String">
+        update notify set is_delete = '0'
+        where system_no = #{systemNo}
+    </update>
+    
+    <select id="getNotifyListForUser" parameterType="com.bs.regsystemapi.modal.dto.notify.QueryUserNotifyForm" resultType="com.bs.regsystemapi.entity.Notify">
+        select <include refid="baseColumns"></include>
+        from notify
+        where notify_object = #{notifyObject} and is_delete = '1'
+    </select>
+
+    <select id="getCountNotRead" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(is_send)
+        from notify
+        where is_read = '0' and notify_object = #{notifyObject} and is_delete = '1'
+    </select>
+
+    <update id="toRead" parameterType="java.lang.String">
+        update notify set is_read = '1'
+        where system_no = #{systemNo}
+    </update>
+
+    <update id="batchToRead" parameterType="java.lang.String">
+        update notify set is_read = '1'
+        where notify_object = #{notifyObject} and is_delete = '1'
+    </update>
+
+    <select id="getNotifyInfo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.entity.Notify">
+        select <include refid="baseColumns"></include>
+        from notify
+        where system_no = #{systemNo} and is_delete = '1'
+    </select>
+
+    <select id="adminGetNotifyInfo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.entity.Notify">
+        select <include refid="baseColumns"></include>
+        from notify
+        where notify_no = #{notifyNo} and is_delete = '1'
+        group by notify_no
+    </select>
+
+    <select id="getNotifyObjectList" parameterType="java.lang.String" resultType="java.lang.String">
+        select u.user_real_name
+        from notify n, user u
+        where n.notify_no = #{notifyNo} and n.is_delete = '1' and n.notify_object = u.user_no
+    </select>
+</mapper>

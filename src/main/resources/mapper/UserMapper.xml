@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bs.regsystemapi.dao.UserDao">
+    <resultMap id="userMap" type="com.bs.regsystemapi.entity.UserEntity">
+
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, user_no, user_name, user_password, create_time, user_tel, user_province, user_address, user_type,
+        user_permission, user_department, user_sex, user_position, user_location, user_specialties, user_avatar, user_email,
+        user_real_name, is_delete, user_work_avatar, reserve_price
+    </sql>
+
+    <select id="getUserInfoByLogin" parameterType="com.bs.regsystemapi.modal.dto.user.UserRequestForm" resultType="com.bs.regsystemapi.modal.vo.user.User">
+        select <include refid="baseColumns"></include>
+        from `user`
+        where user_name = #{userName} and user_password = #{userPassword} and is_delete = '1'
+    </select>
+    <select id="getUserInfo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.entity.UserEntity">
+        select <include refid="baseColumns"></include>
+        from `user`
+        where user_no = #{userNo} and is_delete = '1'
+    </select>
+    <select id="getBaseUserInfo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.UserInfo">
+        select <include refid="baseColumns"></include>
+        from `user`
+        where user_no = #{userNo} and is_delete = '1'
+    </select>
+    <select id="getUserType" parameterType="java.lang.String" resultType="java.lang.String">
+        select user_type
+        from `user`
+        where user_no = #{userNo} and is_delete = '1'
+    </select>
+    <update id="updateUser" parameterType="com.bs.regsystemapi.entity.UserEntity">
+        update `user`
+        <set>
+            <if test="userName != null">
+                user_name = #{userName},
+            </if>
+            <if test="userPassword != null">
+                user_password = #{userPassword},
+            </if>
+            <if test="userTel != null">
+                user_tel = #{userTel},
+            </if>
+            <if test="userProvince != null">
+                user_province = #{userProvince},
+            </if>
+            <if test="userAddress != null">
+                user_address = #{userAddress},
+            </if>
+            <if test="userPermission != null">
+                user_permission = #{userPermission},
+            </if>
+            <if test="userDepartment != null">
+                user_department = #{userDepartment},
+            </if>
+            <if test="userSex != null">
+                user_sex = #{userSex},
+            </if>
+            <if test="userPosition != null">
+                user_position = #{userPosition},
+            </if>
+            <if test="userLocation != null">
+                user_location = #{userLocation},
+            </if>
+            <if test="userSpecialties != null">
+                user_specialties = #{userSpecialties},
+            </if>
+            <if test="userAvatar != null">
+                user_avatar = #{userAvatar},
+            </if>
+            <if test="userEmail != null">
+                user_email = #{userEmail},
+            </if>
+            <if test="userRealName != null">
+                user_real_name = #{userRealName},
+            </if>
+            <if test="userWorkAvatar != null">
+                user_work_avatar = #{userWorkAvatar},
+            </if>
+            <if test="reservePrice != null">
+                reserve_price = #{reservePrice}
+            </if>
+        </set>
+        where user_no = #{userNo}
+    </update>
+
+    <select id="findUserByEmail" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(1) from `user` where user_email = #{userEmail} and is_delete = '1'
+    </select>
+    <update id="updatePasswordByEmail" parameterType="com.bs.regsystemapi.modal.dto.user.FindPasswordForm">
+        update `user` set user_password = #{userPassword} where user_email = #{userEmail} and is_delete = '1'
+    </update>
+
+    <select id="getDoctorList" parameterType="com.bs.regsystemapi.modal.dto.doctor.QueryDoctorForm" resultType="com.bs.regsystemapi.modal.vo.doctor.DoctorInfo">
+        select u.*, d.department ,d.second_department 
+        from `user` u , department d
+        <where>
+            u.user_department = d.second_id and u.is_delete = '1'
+            <if test="userRealName != null">
+                and user_real_name like concat('%',#{userRealName},'%')
+            </if>
+            <if test="userDepartment != null">
+                and user_department = #{userDepartment}
+            </if>
+            <if test="userPosition != null">
+                and user_position = #{userPosition}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="getDoctorInfo" parameterType="java.lang.String" resultType="com.bs.regsystemapi.modal.vo.doctor.DoctorInfo">
+        select <include refid="baseColumns"></include>
+        from `user`
+        where user_no = #{userNo}
+    </select>
+
+    <select id="getDoctorsInfo" parameterType="com.bs.regsystemapi.modal.dto.doctor.QueryDoctorsForm" resultType="com.bs.regsystemapi.modal.vo.doctor.DoctorInfo">
+        select u.*, d.department ,d.second_department
+        from `user` u , department d
+        <where>
+            u.user_department = d.second_id and u.is_delete = '1'
+            <if test="userDepartment != null">
+                and user_department = #{userDepartment}
+            </if>
+            <if test="userPosition != null">
+                and user_position = #{userPosition}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <update id="deleteDoctor" parameterType="java.lang.String">
+        update `user`
+        set is_delete = '0'
+        where user_no = #{userNo}
+    </update>
+
+    <update id="recoverDoctor" parameterType="java.lang.String">
+        update `user`
+        set is_delete = '1'
+        where user_no = #{userNo}
+    </update>
+
+    <select id="getDeleteList" resultType="com.bs.regsystemapi.modal.vo.doctor.DoctorInfo">
+        select u.*, d.department ,d.second_department
+        from `user` u , department d
+        where u.is_delete = '0'
+        order by create_time desc
+    </select>
+
+    <select id="getAdmin" resultType="com.bs.regsystemapi.entity.UserEntity">
+        select <include refid="baseColumns"></include>
+        from `user`
+        where user_type = 'admin' and is_delete = '1'
+    </select>
+
+    <select id="getAccountInfos" resultType="com.bs.regsystemapi.modal.vo.user.UserAccountInfo" parameterType="com.bs.regsystemapi.modal.dto.user.QueryUserAccountForm">
+        select * from(
+            select ROW_NUMBER() over(partition by tt.user_no order by tt.login_time desc) RowNum,tt.*
+            from(
+                select u.user_real_name , u.user_no,u.user_name ,li.login_ip ,li.login_address ,li.login_time,li.login_state,li.login_equi,li.login_online,li.login_remark ,li.login_account
+                    ,li.logout_time,u.user_password, li.info_no
+                from user u
+                left join
+                login_info li on u.user_no = li.user_no
+                <where>
+                    u.is_delete = '1'
+                    <if test="showNotLogin != null and showNotLogin == '0'.toString()">
+                        and li.login_time is not null
+                    </if>
+                </where>
+                ) tt
+        ) as t1
+        <where>
+            RowNum = 1
+            <if test="userRealName != null">
+                and user_real_name like concat('%', #{userRealName}, '%')
+            </if>
+            <if test="userName != null">
+                and user_name like concat('%', #{userName}, '%')
+            </if>
+            <if test="loginState != null">
+                and login_state = #{loginState}
+            </if>
+            <if test="loginOnline != null">
+                and login_online = #{loginOnline}
+            </if>
+        </where>
+        order by login_time desc
+    </select>
+
+    <select id="getAccountInfo" resultType="com.bs.regsystemapi.modal.vo.user.UserAccountInfo" parameterType="java.lang.String">
+        select * from(
+        select ROW_NUMBER() over(partition by tt.user_no order by tt.login_time desc) RowNum,tt.*
+        from(
+        select u.user_real_name , u.user_no,u.user_name ,li.login_ip ,li.login_address ,li.login_time,li.login_state,li.login_equi,li.login_online,li.login_remark ,li.login_account
+        ,li.logout_time,u.user_password, li.info_no
+        from user u
+        left join
+        login_info li on u.user_no = li.user_no
+        where u.is_delete = '1') tt
+        ) as t1
+        where RowNum = 1 and user_no = #{userNo}
+    </select>
+</mapper>
